@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791055564754,
+      "tag": "0000_create_planning_workspace",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791055607391,
+      "tag": "0001_workspace_image_access",
+      "breakpoints": true
+    }
+  ]
+}

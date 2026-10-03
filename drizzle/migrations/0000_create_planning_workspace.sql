@@ -1,0 +1,13 @@
+CREATE TABLE public.folders (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), owner_id uuid NOT NULL DEFAULT auth.uid(), parent_id uuid REFERENCES public.folders(id) ON DELETE CASCADE, name text NOT NULL, description text NOT NULL DEFAULT '', topic text NOT NULL DEFAULT '', icon text NOT NULL DEFAULT 'folder', banner_url text, profile_url text, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.folders TO authenticated; GRANT ALL ON public.folders TO service_role;
+ALTER TABLE public.folders ENABLE ROW LEVEL SECURITY;
+CREATE POLICY folders_owner ON public.folders FOR ALL TO authenticated USING (owner_id = auth.uid()) WITH CHECK (owner_id = auth.uid() AND (parent_id IS NULL OR EXISTS (SELECT 1 FROM public.folders p WHERE p.id = parent_id AND p.owner_id = auth.uid())));
+CREATE TABLE public.tags (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), owner_id uuid NOT NULL DEFAULT auth.uid(), name text NOT NULL, description text NOT NULL DEFAULT '', color text NOT NULL DEFAULT 'blue', created_at timestamptz NOT NULL DEFAULT now(), UNIQUE(owner_id,name));
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.tags TO authenticated; GRANT ALL ON public.tags TO service_role;
+ALTER TABLE public.tags ENABLE ROW LEVEL SECURITY;
+CREATE POLICY tags_owner ON public.tags FOR ALL TO authenticated USING (owner_id = auth.uid()) WITH CHECK (owner_id = auth.uid());
+CREATE TABLE public.notes (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), owner_id uuid NOT NULL DEFAULT auth.uid(), folder_id uuid REFERENCES public.folders(id) ON DELETE SET NULL, title text NOT NULL DEFAULT 'Untitled', content text NOT NULL DEFAULT '', status text NOT NULL DEFAULT 'idea', due_date date, is_pinned boolean NOT NULL DEFAULT false, tag_ids uuid[] NOT NULL DEFAULT '{}', created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.notes TO authenticated; GRANT ALL ON public.notes TO service_role;
+ALTER TABLE public.notes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY notes_owner ON public.notes FOR ALL TO authenticated USING (owner_id = auth.uid()) WITH CHECK (owner_id = auth.uid() AND (folder_id IS NULL OR EXISTS (SELECT 1 FROM public.folders f WHERE f.id = folder_id AND f.owner_id = auth.uid())));
+CREATE INDEX folders_owner_parent_idx ON public.folders(owner_id,parent_id); CREATE INDEX notes_owner_folder_idx ON public.notes(owner_id,folder_id); CREATE INDEX notes_owner_updated_idx ON public.notes(owner_id,updated_at DESC);
