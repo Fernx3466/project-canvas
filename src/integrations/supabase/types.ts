@@ -14,7 +14,133 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      folders: {
+        Row: {
+          banner_url: string | null
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          name: string
+          owner_id: string
+          parent_id: string | null
+          profile_url: string | null
+          topic: string
+          updated_at: string
+        }
+        Insert: {
+          banner_url?: string | null
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          name: string
+          owner_id?: string
+          parent_id?: string | null
+          profile_url?: string | null
+          topic?: string
+          updated_at?: string
+        }
+        Update: {
+          banner_url?: string | null
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          parent_id?: string | null
+          profile_url?: string | null
+          topic?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folders_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notes: {
+        Row: {
+          content: string
+          created_at: string
+          due_date: string | null
+          folder_id: string | null
+          id: string
+          is_pinned: boolean
+          owner_id: string
+          status: string
+          tag_ids: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          due_date?: string | null
+          folder_id?: string | null
+          id?: string
+          is_pinned?: boolean
+          owner_id?: string
+          status?: string
+          tag_ids?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          due_date?: string | null
+          folder_id?: string | null
+          id?: string
+          is_pinned?: boolean
+          owner_id?: string
+          status?: string
+          tag_ids?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tags: {
+        Row: {
+          color: string
+          created_at: string
+          description: string
+          id: string
+          name: string
+          owner_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          description?: string
+          id?: string
+          name: string
+          owner_id?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          description?: string
+          id?: string
+          name?: string
+          owner_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
