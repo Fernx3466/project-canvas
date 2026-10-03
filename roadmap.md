@@ -1,4 +1,4 @@
 - [x] Connect private cloud data and image storage.
-- [ ] Build folder, note, tag, link, search, and planning views.
-- [ ] Add sign-in and appearance preferences.
+- [x] Build folder, note, tag, link, search, and planning views.
+- [x] Add sign-in and appearance preferences.
 - [ ] Verify desktop and mobile workflows.
