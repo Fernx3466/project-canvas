@@ -93,8 +93,8 @@ function Workspace() {
     return () => subscription.unsubscribe();
   }, []);
   useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    document.documentElement.dataset.accent = accent;
+    document.documentElement.dataset["theme"] = theme;
+    document.documentElement.dataset["accent"] = accent;
     document.documentElement.style.setProperty("--custom-first", hexToOklch(customFirst));
     document.documentElement.style.setProperty("--custom-second", hexToOklch(customSecond));
     localStorage.setItem("forma-theme", theme); localStorage.setItem("forma-accent", accent);
@@ -166,7 +166,7 @@ function Workspace() {
     setEditingFolder(f?.id || null); setForm({ name: f?.name || "", description: f?.description || "", topic: f?.topic || "", icon: f?.icon || "✳", color: "violet" }); setModal("folder");
   }
   async function saveFolder() {
-    if (!form.name.trim()) return toast.error("Give your folder a name");
+    if (!form.name.trim()) { toast.error("Give your folder a name"); return; }
     const patch = { name: form.name.trim(), description: form.description, topic: form.topic, icon: form.icon || "✳" };
     if (editingFolder) {
       if (user) { const { error } = await supabase.from("folders").update(patch).eq("id",editingFolder); if (mutationError(error)) return; }
@@ -192,7 +192,7 @@ function Workspace() {
     setForm({ name: tag?.name || "", description: tag?.description || "", topic: "", icon: "", color: tag?.color || "violet" }); setModal("tag");
   }
   async function saveTag() {
-    if (!form.name.trim()) return toast.error("Give your tag a name");
+    if (!form.name.trim()) { toast.error("Give your tag a name"); return; }
     const patch = { name: form.name.trim(), description: form.description, color: form.color };
     if (editingTag) {
       if (user) { const { error } = await supabase.from("tags").update(patch).eq("id",editingTag); if (mutationError(error)) return; }
@@ -215,24 +215,24 @@ function Workspace() {
   }
   async function uploadImage(kind: "banner" | "profile", file: File) {
     if (!selectedFolder) return;
-    if (!user) return toast.info("Sign in to upload images to your workspace");
-    if (!file.type.startsWith("image/") || file.size > 5 * 1024 * 1024) return toast.error("Choose an image under 5 MB");
+    if (!user) { toast.info("Sign in to upload images to your workspace"); return; }
+    if (!file.type.startsWith("image/") || file.size > 5 * 1024 * 1024) { toast.error("Choose an image under 5 MB"); return; }
     setUploading(true);
     const path = `${user.id}/${uuid()}.${file.name.split(".").pop()?.replace(/[^a-z0-9]/gi, "") || "jpg"}`;
     const { error } = await supabase.storage.from("workspace-images").upload(path,file);
     if (error) { toast.error(error.message); setUploading(false); return; }
-    const column = kind === "banner" ? "banner_url" : "profile_url";
-    const { error: updateError } = await supabase.from("folders").update({ [column]: path }).eq("id",selectedFolder);
+    const folderPatch = kind === "banner" ? { banner_url: path } : { profile_url: path };
+    const { error: updateError } = await supabase.from("folders").update(folderPatch).eq("id",selectedFolder);
     if (updateError) { toast.error(updateError.message); setUploading(false); return; }
     const { data } = await supabase.storage.from("workspace-images").createSignedUrl(path, 3600);
     if (data?.signedUrl) setImageUrls(current => ({ ...current, [path]: data.signedUrl }));
-    setFolders(current => current.map(f => f.id === selectedFolder ? { ...f, [column]: path } : f)); setUploading(false); toast.success("Image updated");
+    setFolders(current => current.map(f => f.id === selectedFolder ? { ...f, ...folderPatch } : f)); setUploading(false); toast.success("Image updated");
   }
   async function authSubmit(event: React.FormEvent) {
     event.preventDefault(); setBusy(true);
     const { error, data } = authMode === "login" ? await supabase.auth.signInWithPassword({ email, password }) : await supabase.auth.signUp({ email, password });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     if (authMode === "signup" && !data.session) toast.success("Check your email to confirm your account");
     else { setModal(null); toast.success("Welcome to your workspace"); }
   }
